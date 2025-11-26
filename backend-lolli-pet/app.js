@@ -19,6 +19,7 @@ import clienteRoutes from './src/routes/clienteRoutes.js'
 import petRoutes from './src/routes/petRoutes.js'
 import agendamentoRoutes from './src/routes/agendamentoRoutes.js'
 import prontuarioRoutes from './src/routes/prontuarioRoutes.js'
+import prontuarioArquivoRoutes from './src/routes/prontuarioArquivoRoutes.js'
 
 import './src/database/index.js'
 
@@ -71,6 +72,7 @@ class App {
     this.app.use('/pets', petRoutes)
     this.app.use('/agendamentos', agendamentoRoutes)
     this.app.use('/prontuarios', prontuarioRoutes)
+    this.app.use('/arquivos', prontuarioArquivoRoutes)
   }
 }
 

@@ -1,9 +1,9 @@
 import multer from 'multer'
 import fs from 'fs'
 import { resolve } from 'path'
-import multerProntuarioConfig from '../config/multerProntuarioConfig'
-import Prontuario from '../models/Prontuario'
-import ProntuarioArquivo from '../models/ProntuarioArquivo'
+import multerProntuarioConfig from '../config/multerProntuarioConfig.js'
+import Prontuario from '../models/Prontuario.js'
+import ProntuarioArquivo from '../models/ProntuarioArquivo.js'
 
 const upload = multer(multerProntuarioConfig).single('arquivo')
 
