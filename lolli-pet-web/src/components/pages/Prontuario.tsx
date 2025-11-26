@@ -504,10 +504,8 @@ export default function Prontuario() {
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        // Simular um atraso de 1 segundo (latência de rede)
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
+        const data = await listarPets();
+        setPets(data);
       } catch (err) {
         const apiError = err as ApiError;
         setError(apiError.message || 'Erro ao carregar pets.');
