@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # --- SERVIÇO DO BANCO DE DADOS ---
+  db:
+    image: mariadb:11.2
+    container_name: lollipet-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: lollipet_db
+      MYSQL_USER: lollipet
+      MYSQL_PASSWORD: lollipet123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # --- SERVIÇO DO BACKEND ---
   api:
     build:
@@ -8,12 +28,15 @@ services:
       dockerfile: Dockerfile
     ports:
       # CORREÇÃO: Mapeando a porta INTERNA 3001 para a EXTERNA 3001
-      - "3001:3001" 
+      - "3001:3001"
     volumes:
       - ./backend-lolli-pet:/app
       - /app/node_modules
     env_file:
       - ./backend-lolli-pet/.env
+    depends_on:
+      db:
+        condition: service_healthy
 
   # --- SERVIÇO DO FRONTEND ---
   web:
@@ -28,3 +51,6 @@ services:
     environment:
       # CORREÇÃO: Ajustando para a porta 3001
     - VITE_API_URL=http://api:3001
+
+volumes:
+  mariadb_data:
