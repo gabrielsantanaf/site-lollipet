@@ -10,10 +10,6 @@ export default class Cliente extends Model{
           len: { args: [1, 255], msg: 'Nome do cliente precisa ter entre 1 e 255 caracteres' }
         }
       },
-      sobrenome: {
-        type: Sequelize.STRING,
-        defaultValue: ''
-      },
       email: {
         type: Sequelize.STRING,
         defaultValue: '',
