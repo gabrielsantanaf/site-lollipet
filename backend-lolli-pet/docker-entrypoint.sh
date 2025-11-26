@@ -1,10 +1,14 @@
 #!/bin/sh
 
-echo "Aguardando banco de dados ficar pronto..."
+echo "Aguardando banco de dados inicializar..."
+echo "Esperando 20 segundos para garantir que o banco esta pronto..."
+sleep 20
 
-# Tenta rodar migrations ate 10 vezes
+echo "Tentando executar migrations..."
+
+# Tenta rodar migrations ate 15 vezes
 RETRY=0
-MAX_RETRIES=10
+MAX_RETRIES=15
 
 until npx sequelize-cli db:migrate; do
   RETRY=$((RETRY+1))
@@ -12,11 +16,15 @@ until npx sequelize-cli db:migrate; do
     echo "ERRO: Nao foi possivel conectar ao banco apos $MAX_RETRIES tentativas"
     exit 1
   fi
-  echo "Banco nao esta pronto. Tentativa $RETRY de $MAX_RETRIES. Aguardando 5s..."
-  sleep 5
+  echo "Tentativa $RETRY de $MAX_RETRIES falhou. Aguardando 8s..."
+  sleep 8
 done
 
+echo ""
+echo "===================================="
 echo "Migrations executadas com sucesso!"
-echo "Iniciando servidor..."
+echo "===================================="
+echo ""
+echo "Iniciando servidor Node.js..."
 
 exec npm start

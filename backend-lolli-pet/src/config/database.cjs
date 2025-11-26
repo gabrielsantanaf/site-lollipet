@@ -7,6 +7,26 @@ module.exports = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE,
+
+  // Configurações de pool e retry para evitar timeout
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 60000,  // Timeout para adquirir conexão: 60s
+    idle: 10000
+  },
+
+  // Timeout de conexão
+  dialectOptions: {
+    connectTimeout: 60000,  // 60 segundos
+    timezone: 'America/Sao_Paulo'
+  },
+
+  // Retry automático
+  retry: {
+    max: 10
+  },
+
   define: {
     timestamps: true,
     underscored: true,
@@ -14,8 +34,6 @@ module.exports = {
     'createdAt': 'created_at',
     'updatedAt': 'updated_at'
   },
-  dialectOptions: {
-    timezone: 'America/Sao_Paulo'
-  },
+
   timezone: 'America/Sao_Paulo'
 };
