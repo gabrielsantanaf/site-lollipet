@@ -14,6 +14,7 @@ import {
   LogOut,
   User,
   LogIn,
+  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme } from './context/useTheme';
@@ -80,6 +81,13 @@ export function Heading() {
                 className={getLinkClass('/cadastrar-cliente')}
               >
                 <UserPlus size={16} /> CADASTRO
+              </Link>
+
+              <Link
+                to='/gerenciar-clientes'
+                className={getLinkClass('/gerenciar-clientes')}
+              >
+                <Users size={16} className='text-purple-600 dark:text-purple-400' /> GERENCIAR
               </Link>
 
               <Link
@@ -211,6 +219,14 @@ export function Heading() {
                 className={getLinkClass('/cadastrar-cliente')}
               >
                 <UserPlus size={16} /> CADASTRO
+              </Link>
+
+              <Link
+                to='/gerenciar-clientes'
+                onClick={handleLinkClick}
+                className={getLinkClass('/gerenciar-clientes')}
+              >
+                <Users size={16} className='text-purple-600 dark:text-purple-400' /> GERENCIAR
               </Link>
 
               <Link
