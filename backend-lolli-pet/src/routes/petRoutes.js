@@ -7,7 +7,7 @@ const router = new Router()
 router.post('/', loginRequired, petController.store)
 router.get('/', loginRequired, petController.index)
 router.get('/:id', loginRequired, petController.show)
-router.put('/', loginRequired, petController.update)
-router.delete('/', loginRequired, petController.delete)
+router.put('/:id', loginRequired, petController.update)
+router.delete('/:id', loginRequired, petController.delete)
 
 export default router

@@ -72,6 +72,7 @@ export interface Cliente {
   nome: string;
   email: string;
   telefone?: string;
+  pets?: Pet[];
 }
 
 /**
@@ -635,6 +636,49 @@ export const buscarPet = async (id: number): Promise<Pet> => {
   );
 };
 
+/**
+ * Atualiza um pet
+ *
+ * Envia para: PUT /pets/:id
+ * Headers: Authorization: Bearer {token}
+ * Body: { nome, especie, raca }
+ *
+ * @param id - ID do pet
+ * @param data - Dados para atualizar
+ */
+export const atualizarPet = async (id: number, data: Partial<CriarPetData>): Promise<Pet> => {
+  console.log('[PETS] Atualizando pet:', id);
+
+  return apiRequest<Pet>(
+    `/pets/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    },
+    true
+  );
+};
+
+/**
+ * Deleta um pet
+ *
+ * Envia para: DELETE /pets/:id
+ * Headers: Authorization: Bearer {token}
+ *
+ * @param id - ID do pet
+ */
+export const deletarPet = async (id: number): Promise<null> => {
+  console.log('[PETS] Deletando pet:', id);
+
+  return apiRequest<null>(
+    `/pets/${id}`,
+    {
+      method: 'DELETE',
+    },
+    true
+  );
+};
+
 // ============================================================
 // ENDPOINTS DE AGENDAMENTOS
 // ============================================================
@@ -982,6 +1026,8 @@ export default {
   listarPets,
   cadastrarPet,
   buscarPet,
+  atualizarPet,
+  deletarPet,
 
   // Agendamentos
   agendarClinico,
