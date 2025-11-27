@@ -5,6 +5,7 @@ import { Heading } from './components/Heading';
 import { Home } from './components/Home';
 
 import CadastrarCliente from './components/pages/CadastrarCliente';
+import { GerenciarClientes } from './components/pages/GerenciarClientes';
 import { AgendamentoClinico } from './components/pages/AgendamentoClinico';
 import { AgendamentoPetshop } from './components/pages/AgendamentoPetshop';
 import { Agenda } from './components/pages/Agenda';
@@ -37,6 +38,14 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <CadastrarCliente />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gerenciar-clientes"
+              element={
+                <ProtectedRoute>
+                  <GerenciarClientes />
                 </ProtectedRoute>
               }
             />
