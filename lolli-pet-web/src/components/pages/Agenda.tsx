@@ -128,6 +128,14 @@ export function Agenda() {
   const [selectedAgendamento, setSelectedAgendamento] = useState<Agendamento | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+  // Função para formatar data como YYYY-MM-DD em hora local (sem timezone UTC)
+  const formatarDataLocal = (data: Date): string => {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  };
+
   // Calcular início e fim da semana (domingo a sábado)
   const hoje = new Date();
   const diaSemana = hoje.getDay(); // 0 = domingo, 6 = sábado
@@ -138,15 +146,19 @@ export function Agenda() {
 
   const fimSemana = new Date(inicioSemana);
   fimSemana.setDate(inicioSemana.getDate() + 7);
-  fimSemana.setHours(0, 0, 0, 0);
+  fimSemana.setHours(23, 59, 59, 999);
 
   // Carrega agendamentos da semana do backend
   useEffect(() => {
     const fetchAgendamentos = async () => {
       try {
+        // Usar ISO string para enviar ao backend (backend espera ISO)
         const dataInicio = inicioSemana.toISOString();
         const dataFim = fimSemana.toISOString();
+
+        console.log('[Agenda] Buscando agendamentos de', dataInicio, 'até', dataFim);
         const data = await listarAgendamentos(dataInicio, dataFim);
+        console.log('[Agenda] Agendamentos recebidos:', data.length);
         setAgendamentos(data);
       } catch (err) {
         console.error('[Agenda] Erro ao carregar agendamentos:', err);
@@ -158,26 +170,37 @@ export function Agenda() {
     };
 
     fetchAgendamentos();
-  }, []);
+  }, [inicioSemana.getTime(), fimSemana.getTime()]);
 
   // Agrupar agendamentos por dia da semana
-  const agendamentosPorDia: Record<string, Agendamento[]> = {};
   const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-  // Inicializar todos os dias com array vazio
+  // Criar array de dias com seus agendamentos
+  const diasComAgendamentos = [];
   for (let i = 0; i < 7; i++) {
     const dia = new Date(inicioSemana);
     dia.setDate(inicioSemana.getDate() + i);
-    const diaKey = dia.toISOString().split('T')[0];
-    agendamentosPorDia[diaKey] = [];
+    const diaKey = formatarDataLocal(dia);
+
+    diasComAgendamentos.push({
+      data: dia,
+      dataFormatada: diaKey,
+      nomeDia: diasSemana[i],
+      agendamentos: [] as Agendamento[]
+    });
   }
 
-  // Agrupar agendamentos por dia
+  // Agrupar agendamentos por dia usando data LOCAL
   agendamentos.forEach(ag => {
     const dataAg = new Date(ag.data_hora);
-    const diaKey = dataAg.toISOString().split('T')[0];
-    if (agendamentosPorDia[diaKey]) {
-      agendamentosPorDia[diaKey].push(ag);
+    const diaKey = formatarDataLocal(dataAg);
+    console.log('[Agenda] Agendamento', ag.id, 'agrupado em', diaKey, '(data original:', ag.data_hora, ')');
+
+    const diaEncontrado = diasComAgendamentos.find(d => d.dataFormatada === diaKey);
+    if (diaEncontrado) {
+      diaEncontrado.agendamentos.push(ag);
+    } else {
+      console.warn('[Agenda] Dia não encontrado no agrupamento:', diaKey, 'Agendamento:', ag);
     }
   });
 
@@ -260,18 +283,16 @@ export function Agenda() {
 
         <div className='space-y-8'>
           {/* Iterar por cada dia da semana */}
-          {Object.keys(agendamentosPorDia).map((diaKey, index) => {
-            const diaData = new Date(diaKey + 'T00:00:00');
-            const agendamentosDia = agendamentosPorDia[diaKey];
-            const agendaClinica = agendamentosDia.filter(ag => ag.servico === 'clinico');
-            const agendaPetshop = agendamentosDia.filter(ag => ag.servico === 'petshop');
+          {diasComAgendamentos.map((diaInfo) => {
+            const agendaClinica = diaInfo.agendamentos.filter(ag => ag.servico === 'clinico');
+            const agendaPetshop = diaInfo.agendamentos.filter(ag => ag.servico === 'petshop');
 
-            const isToday = diaData.toDateString() === new Date().toDateString();
+            const isToday = diaInfo.data.toDateString() === new Date().toDateString();
 
             return (
-              <div key={diaKey} className={`${isToday ? 'ring-4 ring-yellow-400 dark:ring-yellow-600 rounded-xl' : ''}`}>
+              <div key={diaInfo.dataFormatada} className={`${isToday ? 'ring-4 ring-yellow-400 dark:ring-yellow-600 rounded-xl' : ''}`}>
                 <h2 className={`text-2xl font-bold mb-4 px-4 py-2 rounded-lg ${isToday ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
-                  {diasSemana[index]} - {diaData.toLocaleDateString('pt-BR')}
+                  {diaInfo.nomeDia} - {diaInfo.data.toLocaleDateString('pt-BR')}
                   {isToday && <span className='ml-2 text-sm'>(Hoje)</span>}
                 </h2>
 

@@ -55,20 +55,27 @@ class AgendamentoController {
     try {
       const { data_inicio, data_fim } = req.query
 
+      console.log('[AgendamentoController] Filtros recebidos:', { data_inicio, data_fim })
+
       // Configurar filtro de data se fornecido
       const whereClause = {}
       if (data_inicio && data_fim) {
         whereClause.data_hora = {
           [Agendamento.sequelize.Sequelize.Op.between]: [data_inicio, data_fim]
         }
+        console.log('[AgendamentoController] Filtro BETWEEN:', data_inicio, 'até', data_fim)
       } else if (data_inicio) {
         whereClause.data_hora = {
           [Agendamento.sequelize.Sequelize.Op.gte]: data_inicio
         }
+        console.log('[AgendamentoController] Filtro GTE:', data_inicio)
       } else if (data_fim) {
         whereClause.data_hora = {
           [Agendamento.sequelize.Sequelize.Op.lte]: data_fim
         }
+        console.log('[AgendamentoController] Filtro LTE:', data_fim)
+      } else {
+        console.log('[AgendamentoController] Sem filtros de data - retornando TODOS')
       }
 
       const agendamentos = await Agendamento.findAll({
@@ -77,7 +84,13 @@ class AgendamentoController {
         include: [
           {
             association: 'pet',
-            attributes: ['id', 'nome', 'especie', 'raca']
+            attributes: ['id', 'nome', 'especie', 'raca'],
+            include: [
+              {
+                association: 'cliente',
+                attributes: ['id', 'nome', 'telefone']
+              }
+            ]
           },
           {
             association: 'veterinario',
@@ -87,6 +100,12 @@ class AgendamentoController {
         ],
         order: [['data_hora', 'ASC']]
       })
+
+      console.log('[AgendamentoController] Total de agendamentos encontrados:', agendamentos.length)
+      if (agendamentos.length > 0) {
+        console.log('[AgendamentoController] Primeiro agendamento:', agendamentos[0].data_hora)
+        console.log('[AgendamentoController] Último agendamento:', agendamentos[agendamentos.length - 1].data_hora)
+      }
 
       return res.json(agendamentos)
     } catch (err) {
