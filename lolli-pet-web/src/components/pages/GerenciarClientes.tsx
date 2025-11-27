@@ -8,7 +8,7 @@ export function GerenciarClientes() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ nome: '', sobrenome: '', email: '', telefone: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', telefone: '' });
 
   // Carregar clientes
   useEffect(() => {
@@ -33,7 +33,6 @@ export function GerenciarClientes() {
     setEditandoId(cliente.id);
     setFormData({
       nome: cliente.nome,
-      sobrenome: cliente.sobrenome || '',
       email: cliente.email,
       telefone: cliente.telefone || '',
     });
@@ -42,7 +41,7 @@ export function GerenciarClientes() {
   // Cancelar edição
   const handleCancelEdit = () => {
     setEditandoId(null);
-    setFormData({ nome: '', sobrenome: '', email: '', telefone: '' });
+    setFormData({ nome: '', email: '', telefone: '' });
   };
 
   // Salvar edição
@@ -51,7 +50,7 @@ export function GerenciarClientes() {
       const atualizado = await atualizarCliente(id, formData);
       setClientes(prev => prev.map(c => c.id === id ? atualizado : c));
       setEditandoId(null);
-      setFormData({ nome: '', sobrenome: '', email: '', telefone: '' });
+      setFormData({ nome: '', email: '', telefone: '' });
       alert('Cliente atualizado com sucesso!');
     } catch (err) {
       console.error('[GerenciarClientes] Erro ao atualizar:', err);
@@ -134,17 +133,6 @@ export function GerenciarClientes() {
                       </div>
                       <div>
                         <label className='block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1'>
-                          <User size={16} className='inline mr-1' /> Sobrenome
-                        </label>
-                        <input
-                          type='text'
-                          value={formData.sobrenome}
-                          onChange={e => setFormData({ ...formData, sobrenome: e.target.value })}
-                          className='w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded focus:border-pink-500'
-                        />
-                      </div>
-                      <div>
-                        <label className='block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1'>
                           <Mail size={16} className='inline mr-1' /> Email
                         </label>
                         <input
@@ -186,7 +174,7 @@ export function GerenciarClientes() {
                   <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4'>
                     <div className='flex-1 space-y-2'>
                       <h3 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
-                        {cliente.nome} {cliente.sobrenome}
+                        {cliente.nome}
                       </h3>
                       <div className='text-sm text-gray-600 dark:text-gray-400 space-y-1'>
                         <p className='flex items-center gap-2'>

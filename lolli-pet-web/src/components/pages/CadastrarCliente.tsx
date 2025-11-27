@@ -25,7 +25,6 @@ const petSchema = z.object({
 // --- ESQUEMA ZOD DO CLIENTE ---
 const cadastrarClienteSchema = z.object({
   nome: z.string().min(1, 'O nome do cliente é obrigatório.'),
-  sobrenome: z.string().optional(),
   email: z.string().email('E-mail inválido.').min(1, 'O e-mail é obrigatório.'),
   telefone: z
     .string()
@@ -55,7 +54,6 @@ export default function App() {
     resolver: zodResolver(cadastrarClienteSchema),
     defaultValues: {
       nome: '',
-      sobrenome: '',
       email: '',
       telefone: '',
       // Inicializa com um Pet obrigatório
@@ -87,7 +85,6 @@ export default function App() {
       // PASSO 1: Criar o cliente
       const clienteData = {
         nome: data.nome,
-        sobrenome: data.sobrenome || undefined,
         email: data.email,
         telefone: data.telefone || undefined,
       };
@@ -115,7 +112,6 @@ export default function App() {
       // Reset no formulário para estado inicial
       reset({
         nome: '',
-        sobrenome: '',
         email: '',
         telefone: '',
         pets: [{ nome: '', especie: '', raca: '' }],
@@ -190,30 +186,6 @@ export default function App() {
                 {errors.nome && (
                   <p className='text-red-500 text-sm mt-1'>
                     {errors.nome.message}
-                  </p>
-                )}
-              </div>
-
-              <div className='form-group'>
-                <label
-                  htmlFor='sobrenome'
-                  className=' font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1'
-                >
-                  <User
-                    size={16}
-                    className='text-cyan-500 dark:text-cyan-400'
-                  />{' '}
-                  Sobrenome:
-                </label>
-                <input
-                  type='text'
-                  id='sobrenome'
-                  {...register('sobrenome')}
-                  className='w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded focus:border-cyan-500 dark:focus:border-cyan-400'
-                />
-                {errors.sobrenome && (
-                  <p className='text-red-500 text-sm mt-1'>
-                    {errors.sobrenome.message}
                   </p>
                 )}
               </div>

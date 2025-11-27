@@ -70,7 +70,6 @@ export interface AuthResponse {
 export interface Cliente {
   id: number;
   nome: string;
-  sobrenome?: string;
   email: string;
   telefone?: string;
 }
@@ -457,7 +456,6 @@ export const revalidateAuth = async (): Promise<boolean> => {
  */
 export interface CriarClienteData {
   nome: string;
-  sobrenome?: string;
   email: string;
   telefone?: string;
 }

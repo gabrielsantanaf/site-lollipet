@@ -3,9 +3,9 @@ import Cliente from '../models/Cliente.js'
 class ClienteController {
     async store(req, res) {
         try {
-            const { id, nome, sobrenome, email, telefone } = await Cliente.create(req.body)
+            const { id, nome, email, telefone } = await Cliente.create(req.body)
 
-            return res.json({ id, nome, sobrenome, email, telefone })
+            return res.json({ id, nome, email, telefone })
         } catch (err) {
             if (err.errors) {
                 return res.status(400).json({ errors: err.errors.map(e => e.message) })
@@ -16,7 +16,7 @@ class ClienteController {
 
     async index(req, res) {
         try {
-            const clientes = await Cliente.findAll({ attributes: ['id', 'nome', 'sobrenome', 'email', 'telefone'] })
+            const clientes = await Cliente.findAll({ attributes: ['id', 'nome', 'email', 'telefone'] })
 
             return res.json(clientes)
         } catch (err) {
@@ -32,8 +32,8 @@ class ClienteController {
                 return res.status(404).json({ errors: ['Cliente não encontrado'] })
             }
 
-            const { id, nome, sobrenome, email, telefone } = cliente
-            return res.json({ id, nome, sobrenome, email, telefone })
+            const { id, nome, email, telefone } = cliente
+            return res.json({ id, nome, email, telefone })
         } catch (err) {
             return res.status(500).json({ errors: [err.message] })
         }
@@ -47,9 +47,9 @@ class ClienteController {
                 return res.status(400).json({ errors: ['Cliente não existe.'] })
             }
 
-            const { id, nome, sobrenome, email, telefone } = await cliente.update(req.body)
+            const { id, nome, email, telefone } = await cliente.update(req.body)
 
-            return res.json({ id, nome, sobrenome, email, telefone })
+            return res.json({ id, nome, email, telefone })
         } catch (err) {
             if (err.errors) {
                 return res.status(400).json({ errors: err.errors.map(e => e.message) })
