@@ -7,7 +7,7 @@ const router = new Router()
 router.post('/', loginRequired, clienteController.store)
 router.get('/', loginRequired, clienteController.index)
 router.get('/:id', loginRequired, clienteController.show)
-router.put('/', loginRequired, clienteController.update)
-router.delete('/', loginRequired, clienteController.delete)
+router.put('/:id', loginRequired, clienteController.update)
+router.delete('/:id', loginRequired, clienteController.delete)
 
 export default router

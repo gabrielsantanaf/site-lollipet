@@ -531,6 +531,49 @@ export const buscarCliente = async (id: number): Promise<Cliente> => {
   );
 };
 
+/**
+ * Atualiza dados de um cliente existente
+ *
+ * Envia para: PUT /clientes/:id
+ * Headers: Authorization: Bearer {token}
+ * Body: { nome?, sobrenome?, email?, telefone? }
+ *
+ * @param id - ID do cliente
+ * @param data - Dados a serem atualizados
+ */
+export const atualizarCliente = async (id: number, data: Partial<CriarClienteData>): Promise<Cliente> => {
+  console.log('[CLIENTES] Atualizando cliente:', id, data);
+
+  return apiRequest<Cliente>(
+    `/clientes/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    },
+    true
+  );
+};
+
+/**
+ * Deleta um cliente
+ *
+ * Envia para: DELETE /clientes/:id
+ * Headers: Authorization: Bearer {token}
+ *
+ * @param id - ID do cliente a ser deletado
+ */
+export const deletarCliente = async (id: number): Promise<null> => {
+  console.log('[CLIENTES] Deletando cliente:', id);
+
+  return apiRequest<null>(
+    `/clientes/${id}`,
+    {
+      method: 'DELETE',
+    },
+    true
+  );
+};
+
 // ============================================================
 // ENDPOINTS DE PETS
 // ============================================================
@@ -934,6 +977,8 @@ export default {
   cadastrarCliente,
   listarClientes,
   buscarCliente,
+  atualizarCliente,
+  deletarCliente,
 
   // Pets
   listarPets,
