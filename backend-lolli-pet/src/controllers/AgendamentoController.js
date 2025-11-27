@@ -53,7 +53,26 @@ class AgendamentoController {
 
   async index(req, res) {
     try {
+      const { data_inicio, data_fim } = req.query
+
+      // Configurar filtro de data se fornecido
+      const whereClause = {}
+      if (data_inicio && data_fim) {
+        whereClause.data_hora = {
+          [Agendamento.sequelize.Sequelize.Op.between]: [data_inicio, data_fim]
+        }
+      } else if (data_inicio) {
+        whereClause.data_hora = {
+          [Agendamento.sequelize.Sequelize.Op.gte]: data_inicio
+        }
+      } else if (data_fim) {
+        whereClause.data_hora = {
+          [Agendamento.sequelize.Sequelize.Op.lte]: data_fim
+        }
+      }
+
       const agendamentos = await Agendamento.findAll({
+        where: whereClause,
         attributes: ['id', 'servico', 'data_hora', 'observacoes', 'status'],
         include: [
           {

@@ -659,11 +659,18 @@ export const agendarPetshop = async (data: CriarAgendamentoData): Promise<Agenda
  * Headers: Authorization: Bearer {token}
  * Retorna: Array de agendamentos com associações pet e veterinario
  */
-export const listarAgendamentos = async (): Promise<Agendamento[]> => {
+export const listarAgendamentos = async (dataInicio?: string, dataFim?: string): Promise<Agendamento[]> => {
   console.log('[AGENDAMENTO] Listando agendamentos');
 
+  // Construir query string se houver filtros de data
+  let url = '/agendamentos';
+  const params = new URLSearchParams();
+  if (dataInicio) params.append('data_inicio', dataInicio);
+  if (dataFim) params.append('data_fim', dataFim);
+  if (params.toString()) url += `?${params.toString()}`;
+
   return apiRequest<Agendamento[]>(
-    '/agendamentos',
+    url,
     {
       method: 'GET',
     },

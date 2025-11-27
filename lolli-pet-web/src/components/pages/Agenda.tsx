@@ -128,18 +128,25 @@ export function Agenda() {
   const [selectedAgendamento, setSelectedAgendamento] = useState<Agendamento | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-  const hoje = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  // Calcular início e fim da semana (domingo a sábado)
+  const hoje = new Date();
+  const diaSemana = hoje.getDay(); // 0 = domingo, 6 = sábado
 
-  // Carrega agendamentos do backend
+  const inicioSemana = new Date(hoje);
+  inicioSemana.setDate(hoje.getDate() - diaSemana);
+  inicioSemana.setHours(0, 0, 0, 0);
+
+  const fimSemana = new Date(inicioSemana);
+  fimSemana.setDate(inicioSemana.getDate() + 7);
+  fimSemana.setHours(0, 0, 0, 0);
+
+  // Carrega agendamentos da semana do backend
   useEffect(() => {
     const fetchAgendamentos = async () => {
       try {
-        const data = await listarAgendamentos();
+        const dataInicio = inicioSemana.toISOString();
+        const dataFim = fimSemana.toISOString();
+        const data = await listarAgendamentos(dataInicio, dataFim);
         setAgendamentos(data);
       } catch (err) {
         console.error('[Agenda] Erro ao carregar agendamentos:', err);
@@ -153,19 +160,26 @@ export function Agenda() {
     fetchAgendamentos();
   }, []);
 
-  // Filtra agendamentos do dia atual
-  const hojeData = new Date();
-  hojeData.setHours(0, 0, 0, 0);
-  const amanha = new Date(hojeData);
-  amanha.setDate(amanha.getDate() + 1);
+  // Agrupar agendamentos por dia da semana
+  const agendamentosPorDia: Record<string, Agendamento[]> = {};
+  const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-  const agendamentosHoje = agendamentos.filter(ag => {
+  // Inicializar todos os dias com array vazio
+  for (let i = 0; i < 7; i++) {
+    const dia = new Date(inicioSemana);
+    dia.setDate(inicioSemana.getDate() + i);
+    const diaKey = dia.toISOString().split('T')[0];
+    agendamentosPorDia[diaKey] = [];
+  }
+
+  // Agrupar agendamentos por dia
+  agendamentos.forEach(ag => {
     const dataAg = new Date(ag.data_hora);
-    return dataAg >= hojeData && dataAg < amanha;
+    const diaKey = dataAg.toISOString().split('T')[0];
+    if (agendamentosPorDia[diaKey]) {
+      agendamentosPorDia[diaKey].push(ag);
+    }
   });
-
-  const agendaClinica = agendamentosHoje.filter(ag => ag.servico === 'clinico');
-  const agendaPetshop = agendamentosHoje.filter(ag => ag.servico === 'petshop');
 
   // Função para cancelar agendamento
   const handleCancel = async (id: number) => {
@@ -235,61 +249,82 @@ export function Agenda() {
 
   return (
     <div className='p-8 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-150px)] flex justify-center items-start transition-colors duration-500'>
-      <div className='container max-w-6xl w-full'>
+      <div className='container max-w-7xl w-full'>
         <h1 className='text-3xl font-extrabold text-center text-pink-600 dark:text-pink-400 mb-6 border-b-2 border-yellow-400 dark:border-yellow-600 pb-2 flex items-center justify-center gap-2'>
           <CalendarDays size={30} />
-          Agenda do Dia
+          Agenda da Semana
         </h1>
         <p className='text-center text-gray-500 dark:text-gray-400 mb-8 font-semibold'>
-          Agendamentos para {hoje}
+          {inicioSemana.toLocaleDateString('pt-BR')} - {new Date(fimSemana.getTime() - 1).toLocaleDateString('pt-BR')}
         </p>
 
-        <div className='agenda-container flex flex-col lg:flex-row gap-8'>
-          {/* Seção Clínica */}
-          <section className='agenda-clinica flex-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-cyan-500 dark:border-cyan-600 transition-colors duration-500'>
-            <h2 className='text-2xl font-bold text-center text-cyan-700 dark:text-cyan-400 mb-6 border-b border-cyan-200 dark:border-cyan-700 pb-3 flex items-center justify-center gap-2'>
-              <StethoscopeIcon size={24} /> Agenda Clínica
-            </h2>
-            <div className='space-y-4'>
-              {agendaClinica.map(agendamento => (
-                <AgendamentoCard
-                  key={agendamento.id}
-                  agendamento={agendamento}
-                  tipo='clinica'
-                  onCancel={handleCancel}
-                  onEdit={handleEdit}
-                />
-              ))}
-            </div>
-            {agendaClinica.length === 0 && (
-              <p className='text-center text-gray-500 dark:text-gray-400 italic mt-8'>
-                Nenhum agendamento clínico para hoje.
-              </p>
-            )}
-          </section>
+        <div className='space-y-8'>
+          {/* Iterar por cada dia da semana */}
+          {Object.keys(agendamentosPorDia).map((diaKey, index) => {
+            const diaData = new Date(diaKey + 'T00:00:00');
+            const agendamentosDia = agendamentosPorDia[diaKey];
+            const agendaClinica = agendamentosDia.filter(ag => ag.servico === 'clinico');
+            const agendaPetshop = agendamentosDia.filter(ag => ag.servico === 'petshop');
 
-          {/* Seção Petshop */}
-          <section className='agenda-petshop flex-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-pink-500 dark:border-pink-600 transition-colors duration-500'>
-            <h2 className='text-2xl font-bold text-center text-pink-700 dark:text-pink-400 mb-6 border-b border-pink-200 dark:border-pink-700 pb-3 flex items-center justify-center gap-2'>
-              <BathIcon size={24} /> Agenda Petshop
-            </h2>
-            <div className='space-y-4'>
-              {agendaPetshop.map(agendamento => (
-                <AgendamentoCard
-                  key={agendamento.id}
-                  agendamento={agendamento}
-                  tipo='petshop'
-                  onCancel={handleCancel}
-                  onEdit={handleEdit}
-                />
-              ))}
-            </div>
-            {agendaPetshop.length === 0 && (
-              <p className='text-center text-gray-500 dark:text-gray-400 italic mt-8'>
-                Nenhum agendamento de petshop para hoje.
-              </p>
-            )}
-          </section>
+            const isToday = diaData.toDateString() === new Date().toDateString();
+
+            return (
+              <div key={diaKey} className={`${isToday ? 'ring-4 ring-yellow-400 dark:ring-yellow-600 rounded-xl' : ''}`}>
+                <h2 className={`text-2xl font-bold mb-4 px-4 py-2 rounded-lg ${isToday ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
+                  {diasSemana[index]} - {diaData.toLocaleDateString('pt-BR')}
+                  {isToday && <span className='ml-2 text-sm'>(Hoje)</span>}
+                </h2>
+
+                <div className='agenda-container flex flex-col lg:flex-row gap-8'>
+                  {/* Seção Clínica */}
+                  <section className='agenda-clinica flex-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-cyan-500 dark:border-cyan-600 transition-colors duration-500'>
+                    <h3 className='text-xl font-bold text-center text-cyan-700 dark:text-cyan-400 mb-4 border-b border-cyan-200 dark:border-cyan-700 pb-3 flex items-center justify-center gap-2'>
+                      <StethoscopeIcon size={20} /> Clínica ({agendaClinica.length})
+                    </h3>
+                    <div className='space-y-4'>
+                      {agendaClinica.map(agendamento => (
+                        <AgendamentoCard
+                          key={agendamento.id}
+                          agendamento={agendamento}
+                          tipo='clinica'
+                          onCancel={handleCancel}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </div>
+                    {agendaClinica.length === 0 && (
+                      <p className='text-center text-gray-500 dark:text-gray-400 italic mt-4 text-sm'>
+                        Sem agendamentos clínicos
+                      </p>
+                    )}
+                  </section>
+
+                  {/* Seção Petshop */}
+                  <section className='agenda-petshop flex-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-pink-500 dark:border-pink-600 transition-colors duration-500'>
+                    <h3 className='text-xl font-bold text-center text-pink-700 dark:text-pink-400 mb-4 border-b border-pink-200 dark:border-pink-700 pb-3 flex items-center justify-center gap-2'>
+                      <BathIcon size={20} /> Petshop ({agendaPetshop.length})
+                    </h3>
+                    <div className='space-y-4'>
+                      {agendaPetshop.map(agendamento => (
+                        <AgendamentoCard
+                          key={agendamento.id}
+                          agendamento={agendamento}
+                          tipo='petshop'
+                          onCancel={handleCancel}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </div>
+                    {agendaPetshop.length === 0 && (
+                      <p className='text-center text-gray-500 dark:text-gray-400 italic mt-4 text-sm'>
+                        Sem agendamentos de petshop
+                      </p>
+                    )}
+                  </section>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Status Modal */}
