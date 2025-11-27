@@ -299,22 +299,7 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* Informações de Debug (remover em produção) */}
-        <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-400">
-          <p className="font-semibold mb-1">🔧 Informações de Debug:</p>
-          <p>
-            • Endpoint: <code className="bg-white dark:bg-gray-800 px-1 py-0.5 rounded">POST /api/auth/signup</code>
-          </p>
-          <p>
-            • Body:{' '}
-            <code className="bg-white dark:bg-gray-800 px-1 py-0.5 rounded">
-              {'{ nome, email, password}'}
-            </code>
-          </p>
-          <p>
-            • Token salvo em: <code className="bg-white dark:bg-gray-800 px-1 py-0.5 rounded">localStorage.authToken</code>
-          </p>
-        </div>
+       
       </div>
     </div>
   );
